@@ -5,8 +5,8 @@ export const CATEGORIES = [
 export const REGIONS = [
   "Toshkent", "Samarqand", "Buxoro", "Farg’ona", "Andijon", "Namangan", "Xorazm", "Masofaviy (Online)",
 ];
-// Admin Telegram username (@ belgisisiz). O‘zingiznikiga almashtiring.
-export const ADMIN_TELEGRAM = "vazifabor_admin";
+export const ADMIN_TELEGRAM = "vazifabor";
+export const ADMIN_PHONE = "+998974597172";
 
 export function timeAgo(iso) {
   const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);

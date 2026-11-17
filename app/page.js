@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Search, MapPin, Plus, ShieldCheck } from "lucide-react";
 import { supabase } from "./supabase";
 import { SAMPLE_LISTINGS } from "./sampleData";
-import { CATEGORIES, REGIONS, ADMIN_TELEGRAM } from "./utils";
+import { CATEGORIES, REGIONS, ADMIN_TELEGRAM, ADMIN_PHONE, formatPhone } from "./utils";
 import ListingCard from "./ListingCard";
 import ListingDetailModal from "./ListingDetailModal";
 import PostModal from "./PostModal";
@@ -203,6 +203,7 @@ export default function Home() {
             <Logo />
             <p className="mt-3 text-sm text-slate-600">O‘zbekistondagi ish beruvchilar va mutaxassislar uchun ishonchli, komissiyasiz maydon.</p>
             <a href={`https://t.me/${ADMIN_TELEGRAM}`} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block text-sm font-semibold text-brand hover:underline">Admin bilan Telegramda bog‘lanish</a>
+            <a href={`tel:${ADMIN_PHONE}`} className="mt-1 block text-sm font-semibold text-ok hover:underline">Admin: {formatPhone(ADMIN_PHONE)}</a>
           </div>
           <div>
             <h3 className="font-semibold text-brand-dark">Kategoriyalar</h3>
