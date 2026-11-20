@@ -17,6 +17,8 @@ const SAFETY = [
   "Shubhali e’londan adminga Telegram orqali xabar bering.",
 ];
 
+const fixRegion = (r) => (r.region === "Toshkent" ? { ...r, region: "Toshkent shahri" } : r);
+
 function Logo() {
   return (
     <div className="flex items-center gap-2.5">
@@ -78,12 +80,13 @@ export default function Home() {
   useEffect(() => {
     let alive = true;
     (async () => {
-      let rows = SAMPLE_LISTINGS;
+      let real = [];
       try {
         const { data, error } = await supabase.from("listings").select("*").order("created_at", { ascending: false }).limit(100);
-        if (!error && data && data.length) rows = data;
+        if (!error && data) real = data.map(fixRegion);
       } catch (e) {}
       if (!alive) return;
+      const rows = [...real, ...SAMPLE_LISTINGS];
       setItems(rows);
       setLoading(false);
       const f = rows.find((x) => x.id === window.location.hash.slice(1));
@@ -92,7 +95,7 @@ export default function Home() {
 
     const ch = supabase.channel("listings-live")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "listings" }, (p) => {
-        setItems((prev) => (prev.some((x) => x.id === p.new.id) ? prev : [p.new, ...prev]));
+        setItems((prev) => (prev.some((x) => x.id === p.new.id) ? prev : [fixRegion(p.new), ...prev]));
       })
       .subscribe();
     return () => { alive = false; supabase.removeChannel(ch); };
@@ -115,26 +118,34 @@ export default function Home() {
     }
   };
 
+  // Haqiqiy e’lonlar 10 tadan oshgach, namunalar o‘zi yashirinadi
+  const visible = useMemo(() => {
+    const real = { job: 0, specialist: 0 };
+    items.forEach((x) => { if (!x.sample) real[x.type]++; });
+    return items.filter((x) => !x.sample || real[x.type] < 10);
+  }, [items]);
+
   const counts = useMemo(() => ({
-    job: items.filter((x) => x.type === "job").length,
-    specialist: items.filter((x) => x.type === "specialist").length,
-    done: items.reduce((s, x) => s + (x.completed_jobs || 0), 0),
-  }), [items]);
+    job: visible.filter((x) => x.type === "job").length,
+    specialist: visible.filter((x) => x.type === "specialist").length,
+    real: items.filter((x) => !x.sample).length,
+  }), [items, visible]);
 
   const list = useMemo(() => {
     const q = query.trim().toLowerCase();
-    let r = items.filter((x) =>
+    let r = visible.filter((x) =>
       x.type === tab &&
       (category === "Barchasi" || x.category === category) &&
       (region === "Barcha hududlar" || x.region === region) &&
       (!q || `${x.title} ${x.description} ${x.category} ${x.region}`.toLowerCase().includes(q))
     );
     const t = (x) => new Date(x.created_at).getTime();
-    if (sort === "verified") r = [...r].sort((a, b) => Number(b.verified) - Number(a.verified) || t(b) - t(a));
-    else if (sort === "rating") r = [...r].sort((a, b) => b.rating - a.rating || t(b) - t(a));
-    else r = [...r].sort((a, b) => t(b) - t(a));
+    const s = (a, b) => Number(!!a.sample) - Number(!!b.sample);
+    if (sort === "verified") r = [...r].sort((a, b) => s(a, b) || Number(b.verified) - Number(a.verified) || t(b) - t(a));
+    else if (sort === "rating") r = [...r].sort((a, b) => s(a, b) || b.rating - a.rating || t(b) - t(a));
+    else r = [...r].sort((a, b) => s(a, b) || t(b) - t(a));
     return r;
-  }, [items, tab, category, region, query, sort]);
+  }, [visible, tab, category, region, query, sort]);
 
   return (
     <div className="min-h-screen">
@@ -173,8 +184,7 @@ export default function Home() {
             IT va dizayndan tortib uy ta’mirlashgacha — tasdiqlangan mutaxassislarni bir necha daqiqada toping yoki o‘z xizmatlaringizni taklif qiling.
           </p>
           <div className="mx-auto mt-5 flex max-w-xl flex-wrap justify-center gap-x-6 gap-y-1 text-sm text-slate-600">
-            <span><b className="text-brand-dark">{counts.specialist}</b> faol mutaxassis</span>
-            <span><b className="text-brand-dark">{counts.done}</b> bajarilgan ish</span>
+            <span><b className="text-brand-dark">{counts.real}</b> ta faol e’lon</span>
             <span className="inline-flex items-center gap-1"><ShieldCheck size={15} className="text-ok" /> <b className="text-ok">0%</b> komissiya, to‘g‘ridan-to‘g‘ri aloqa</span>
           </div>
         </section>

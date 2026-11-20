@@ -6,6 +6,7 @@ import { formatPrice, formatPhone, timeAgo } from "./utils";
 export function ContactActions({ l, toast }) {
   const [shown, setShown] = useState(false);
   const tg = (l.telegram || "").replace("@", "");
+  if (l.sample) return <p className="rounded-lg bg-amber-50 p-3 text-xs text-amber-800">Bu namuna e’lon: sayt qanday ko‘rinishini ko‘rsatish uchun qo‘yilgan. Aloqa ma’lumoti yo‘q.</p>;
 
   const call = async () => {
     setShown(true);
@@ -62,7 +63,7 @@ export default function ListingCard({ l, onOpen, toast }) {
       </button>
 
       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600">
-        <span className="font-medium text-slate-800">{l.author_name}</span>
+        {l.sample ? <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800">Namuna e’lon</span> : <span className="font-medium text-slate-800">{l.author_name}</span>}
         {l.verified && (
           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-ok">
             <ShieldCheck size={13} /> Tasdiqlangan
