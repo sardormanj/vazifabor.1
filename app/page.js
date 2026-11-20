@@ -1,12 +1,13 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { Search, MapPin, Plus, ShieldCheck } from "lucide-react";
+import { Search, MapPin, Plus, ShieldCheck, Sun, Moon } from "lucide-react";
 import { supabase } from "./supabase";
 import { SAMPLE_LISTINGS } from "./sampleData";
 import { CATEGORIES, REGIONS, ADMIN_TELEGRAM, ADMIN_PHONE, formatPhone } from "./utils";
 import ListingCard from "./ListingCard";
 import ListingDetailModal from "./ListingDetailModal";
 import PostModal from "./PostModal";
+import LegalModal from "./LegalModal";
 
 const SAFETY = [
   "Notanish odamga 100% oldindan to‘lov qilmang: avval kichik qismini, qolganini ish tugagach to‘lang.",
@@ -52,6 +53,25 @@ export default function Home() {
   const [post, setPost] = useState(null);
   const [detail, setDetail] = useState(null);
   const [toastMsg, setToastMsg] = useState("");
+  const [legal, setLegal] = useState(null);
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    let d = false;
+    try {
+      const s = localStorage.getItem("vb-theme");
+      d = s ? s === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    } catch (e) {}
+    setDark(d);
+    document.documentElement.classList.toggle("dark", d);
+  }, []);
+
+  const toggleTheme = () => {
+    const n = !dark;
+    setDark(n);
+    document.documentElement.classList.toggle("dark", n);
+    try { localStorage.setItem("vb-theme", n ? "dark" : "light"); } catch (e) {}
+  };
 
   const toast = (m) => { setToastMsg(m); setTimeout(() => setToastMsg(""), 2200); };
 
@@ -135,6 +155,9 @@ export default function Home() {
             </div>
           </div>
           <div className="ml-auto flex gap-2">
+            <button onClick={toggleTheme} aria-label={dark ? "Yorug‘ rejim" : "Qorong‘i rejim"} title={dark ? "Yorug‘ rejim" : "Qorong‘i rejim"} className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-2.5 text-slate-700 hover:bg-slate-50">
+              {dark ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
             <button onClick={() => setPost("job")} className="inline-flex items-center gap-1 rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-white hover:bg-brand-dark"><Plus size={15} /> Ish berish</button>
             <button onClick={() => setPost("specialist")} className="inline-flex items-center gap-1 rounded-lg bg-ok px-3 py-2 text-sm font-semibold text-white hover:opacity-90"><Plus size={15} /> Ish izlash</button>
           </div>
@@ -221,11 +244,20 @@ export default function Home() {
             </details>
           </div>
         </div>
-        <div className="border-t border-slate-100 py-4 text-center text-xs text-slate-500">© 2026 VazifaBor. Barcha huquqlar himoyalangan.</div>
+        <div className="border-t border-slate-100 px-4 py-4 text-center text-xs text-slate-500">
+          <p className="mx-auto max-w-3xl">VazifaBor — faqat e’lonlar maydoni. Biz ish beruvchi yoki to‘lov vositachisi emasmiz. E’lonlar va kelishuvlar uchun e’lon beruvchi javob beradi, foydalanuvchi o‘z xavfi bilan foydalanadi.</p>
+          <p className="mt-2">
+            <button onClick={() => setLegal("terms")} className="underline hover:text-brand">Foydalanish shartlari</button>
+            <span className="mx-2">·</span>
+            <button onClick={() => setLegal("privacy")} className="underline hover:text-brand">Maxfiylik siyosati</button>
+          </p>
+          <p className="mt-2">© 2026 VazifaBor. Barcha huquqlar himoyalangan.</p>
+        </div>
       </footer>
 
       {detail && <ListingDetailModal l={detail} onClose={() => setDetail(null)} toast={toast} />}
-      {post && <PostModal initialType={post} onClose={() => setPost(null)} onSubmit={handlePost} />}
+      {post && <PostModal initialType={post} onClose={() => setPost(null)} onSubmit={handlePost} onLegal={setLegal} />}
+      {legal && <LegalModal kind={legal} onClose={() => setLegal(null)} />}
 
       {toastMsg && (
         <div className="fixed bottom-5 left-1/2 z-[60] -translate-x-1/2 rounded-lg bg-brand-dark px-4 py-2.5 text-sm font-medium text-white shadow-lg">{toastMsg}</div>

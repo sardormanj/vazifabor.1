@@ -11,7 +11,8 @@ function Field({ label, error, children }) {
   );
 }
 
-export default function PostModal({ initialType, onClose, onSubmit }) {
+export default function PostModal({ initialType, onClose, onSubmit, onLegal }) {
+  const [agree, setAgree] = useState(false);
   const [f, setF] = useState({
     type: initialType, title: "", category: CATEGORIES[0], region: REGIONS[0], price: "",
     currency: "UZS", extra: "", description: "", name: "", phone: "+998", telegram: "",
@@ -28,6 +29,7 @@ export default function PostModal({ initialType, onClose, onSubmit }) {
     if (f.name.trim().length < 2) er.name = "Ism va familiyangizni kiriting";
     if (digits.length !== 9) er.phone = "Telefon raqamni to‘liq kiriting";
     if (f.telegram && !/^@?[A-Za-z0-9_]{4,32}$/.test(f.telegram.trim())) er.telegram = "Telegram username noto‘g‘ri (masalan, @username)";
+    if (!agree) er.agree = "Davom etish uchun shartlarga rozilik bering";
     setErr(er);
     if (Object.keys(er).length) return;
 
@@ -86,6 +88,18 @@ export default function PostModal({ initialType, onClose, onSubmit }) {
         <div className="grid grid-cols-2 gap-3">
           <Field label="Telefon raqam" error={err.phone}><input className="inp mt-1" inputMode="tel" value={f.phone} onChange={(e) => set("phone", formatPhone(e.target.value))} /></Field>
           <Field label="Telegram username" error={err.telegram}><input className="inp mt-1" value={f.telegram} onChange={(e) => set("telegram", e.target.value)} placeholder="@username" /></Field>
+        </div>
+
+        <div>
+          <label className="flex items-start gap-2 text-sm text-slate-600">
+            <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-1 h-4 w-4 shrink-0" />
+            <span>
+              Men <button type="button" onClick={() => onLegal("terms")} className="font-medium text-brand underline">Foydalanish shartlari</button> va{" "}
+              <button type="button" onClick={() => onLegal("privacy")} className="font-medium text-brand underline">Maxfiylik siyosati</button> bilan tanishdim.
+              Ism va telefon raqamim e’lon bilan birga hamma uchun ochiq ko‘rsatilishiga roziman.
+            </span>
+          </label>
+          {err.agree && <span className="mt-1 block text-xs text-red-600">{err.agree}</span>}
         </div>
 
         <button type="submit" className="w-full rounded-lg bg-ok py-3 font-semibold text-white transition-opacity hover:opacity-90">E’lonni joylash</button>

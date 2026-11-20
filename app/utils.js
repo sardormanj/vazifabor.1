@@ -3,7 +3,9 @@ export const CATEGORIES = [
   "Ustachilik va Ta’mirlash", "Yetkazib berish", "Repetitorlik", "Boshqa",
 ];
 export const REGIONS = [
-  "Toshkent", "Samarqand", "Buxoro", "Farg’ona", "Andijon", "Namangan", "Xorazm", "Masofaviy (Online)",
+  "Toshkent shahri", "Toshkent viloyati", "Andijon", "Buxoro", "Farg’ona", "Jizzax", "Xorazm",
+  "Namangan", "Navoiy", "Qashqadaryo", "Samarqand", "Sirdaryo", "Surxondaryo",
+  "Qoraqalpog’iston Respublikasi", "Masofaviy (Online)",
 ];
 export const ADMIN_TELEGRAM = "vazifabor";
 export const ADMIN_PHONE = "+998974597172";
